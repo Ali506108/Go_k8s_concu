@@ -1,7 +1,18 @@
 package main
 
-import "fmt"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
-	fmt.Println()
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.Default()
+	router.Use(gin.Logger(), gin.Recovery())
+	router.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
+
+	router.Run(":8432")
 }
