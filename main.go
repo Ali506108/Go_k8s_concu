@@ -1,67 +1,49 @@
 package main
 
 import (
-	"net/http"
+	"log"
+
+	"github.com/Ali506108/Go_k8s_concu/model"
+	"github.com/Ali506108/Go_k8s_concu/service"
 
 	"github.com/gin-gonic/gin"
 )
-
-func getUser(c *gin.Context) {
-	name := c.Param("name")
-	c.JSON(http.StatusOK, gin.H{
-		"username": name,
-		"surename": "Duisen",
-		"age":      20,
-	})
-}
-
-func createUser(c *gin.Context) {
-	name := c.Param("name")
-	comment := c.Param("comment")
-	message := name + ": " + comment
-	c.JSON(http.StatusCreated, gin.H{
-		"username": "Alex",
-		"surename": "Duisen",
-		"age":      20,
-		"message":  message,
-	})
-}
-
-func updateUser(c *gin.Context) {
-	c.JSON(http.StatusAccepted, gin.H{
-		"username": "Alex",
-		"surename": "Duisen",
-		"age":      20,
-	})
-}
-
-func deleteUser(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"username": "Alex",
-		"surename": "Duisen",
-		"age":      20,
-	})
-}
-
-func HeadUser(c *gin.Context) {
-	c.Status(http.StatusOK)
-}
-
-func OptionUser(c *gin.Context) {
-	c.Status(http.StatusOK)
-}
 
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.Use(gin.Logger(), gin.Recovery())
-	router.GET("/user/:name", getUser)
-	router.POST("/user/:name/*comment", createUser)
-	router.PUT("/user", updateUser)
-	router.PATCH("/user", updateUser)
-	router.DELETE("/user", deleteUser)
-	router.HEAD("/user", HeadUser)
-	router.OPTIONS("/user", OptionUser)
+	router.GET("/user/:name", service.GetUser)
+	router.POST("/user/:name/*comment", service.CreateUser)
+	router.PUT("/user", service.UpdateUser)
+	router.PATCH("/user", service.UpdateUser)
+	router.DELETE("/user", service.DeleteUser)
+	router.HEAD("/user", service.HeadUser)
+	router.OPTIONS("/user", service.OptionUser)
 
-	router.Run(":8432")
+	// new commit changes
+	router.POST("/user/form", func(c *gin.Context) {
+		var req model.FormRequest
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(400, gin.H{
+				"error": "Invalid JSON provided",
+			})
+			return
+		}
+
+		if req.Nick == "" {
+			req.Nick = "Anonymous"
+		}
+
+		c.JSON(200, gin.H{
+			"status":  "posted",
+			"message": req.Message,
+			"nick":    req.Nick,
+		})
+	})
+
+	if err := router.Run("8432"); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }
