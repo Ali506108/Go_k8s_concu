@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// learn gin
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
